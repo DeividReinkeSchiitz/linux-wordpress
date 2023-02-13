@@ -40,3 +40,4 @@ echo "Downloading the wordpress package.."
 wget https://wordpress.org/latest.tar.gz
 tar -xvzf latest.tar.gz
 sudo mv wordpress/* /var/www/html/
+sudo rm -rf ./wordpress
