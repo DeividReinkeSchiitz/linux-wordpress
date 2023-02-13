@@ -9,9 +9,9 @@ sudo apt upgrade
 # Step 2.1: Get password from user
 clear
 echo "Enter the username for wordpress: "
-read -s wordpress_user
+read wordpress_user
 echo "Enter the root password for wordpress: "
-read -s wordpress_password
+read wordpress_password
 
 # Step 2.2: Set the environment variables
 export DB_NAME="wordpress"
@@ -41,3 +41,4 @@ wget https://wordpress.org/latest.tar.gz
 tar -xvzf latest.tar.gz
 sudo mv wordpress/* /var/www/html/
 sudo rm -rf ./wordpress
+sudo rm -rf latest.tar.gz
