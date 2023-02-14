@@ -14,9 +14,13 @@ clear
 wp_db_name="wordpress"
 
 echo "Enter a wordpress username (used as database username and wordpress admin username): "
-read wordpress_user
+read -s  wordpress_user
 echo "Enter the root password for wordpress (used as MySql root password, db password and admin password): "
+stty -echo
 read wordpress_password
+stty echo
+echo " "
+
 
 # Step 2: Update the system
 sudo apt update
