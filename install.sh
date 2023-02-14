@@ -3,6 +3,12 @@
 # Shell script to install wordpress on linux machine
 # Tested in Ubuntu 22.04
 
+# demand to run as sudo
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit
+fi
+
 # Step 1: Configure the required variables
 clear
 wp_db_name="wordpress"
