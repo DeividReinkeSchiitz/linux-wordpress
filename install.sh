@@ -33,26 +33,28 @@ echo "Configuring the database..."
 cd /tmp/
 curl -LO https://wordpress.org/latest.tar.gz
 tar xzvf latest.tar.gz
-sudo mv wordpress /var/www/html
+sudo mv wordpress/* /var/www/html
+sudo rm -rf wordpress latest.tar.gz
 
 # Set permissions for WordPress
 sudo chown -R www-data:www-data /var/www/html/wordpress
 sudo chmod -R 755 /var/www/html/wordpress
 
 # Create a MySQL database for WordPress
-mysql -u root -p << EOF
-CREATE DATABASE $wp_db_name;
-CREATE USER '$wordpress_user'@'localhost' IDENTIFIED BY '$wordpress_password';
-GRANT ALL PRIVILEGES ON wordpress.* TO '$wordpress_user'@'localhost';
-FLUSH PRIVILEGES;
-EOF
+sudo mysql -u root -p"$wordpress_password" -e "CREATE DATABASE $wp_db_name;"
+sudo mysql -u root -p"$wordpress_password" -e "GRANT ALL PRIVILEGES ON $wp_db_name.* TO '$wordpress_user'@'localhost' IDENTIFIED BY '$wordpress_password';"
+sudo mysql -u root -p"$wordpress_password" -e "FLUSH PRIVILEGES;"
+sudo mysql -u root -p"$wordpress_password" -e "EXIT;"
+sudo mysql -u root -p"$wordpress_password" -e "SHOW DATABASES;"
+sudo mysql -u root -p"$wordpress_password" -e "USE $wp_db_name;"
+sudo mysql -u root -p"$wordpress_password" -e "SHOW TABLES;"
+sudo mysql -u root -p"$wordpress_password" -e "SELECT user,host FROM mysql.user;"
 
 # Rename the WordPress sample configuration file and configure it
-sudo mv /var/www/html/wordpress/wp-config-sample.php /var/www/html/wordpress/wp-config.php
-sudo sed -i 's/database_name_here/$wordpress/g' /var/www/html/wordpress/wp-config.php
-sudo sed -i 's/username_here/$wordpress_user/g' /var/www/html/wordpress/wp-config.php
-sudo sed -i 's/password_here/$wordpress_password/g' /var/www/html/wordpress/wp-config.php
-
+sudo mv /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
+sudo sed -i "s/database_name_here/$wp_db_name/g" /var/www/html/wp-config.php
+sudo sed -i "s/username_here/$wordpress_user/g" /var/www/html/wp-config.php
+sudo sed -i "s/password_here/$wordpress_password/g" /var/www/html/wp-config.php
 
 # reload apache2
 sudo systemctl reload apache2
