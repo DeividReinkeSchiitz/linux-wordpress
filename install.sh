@@ -1,86 +1,63 @@
 #!/bin/bash
 
-# Shell script to install wordpress on linux machine
-# Tested in Ubuntu 22.04
-
 # demand to run as sudo
 if [ "$EUID" -ne 0 ]
   then echo "Please run as root"
   exit
 fi
 
-# Step 1: Configure the required variables
+# Configure the required variables
 clear
 wp_db_name="wordpress"
 
 echo "Enter a wordpress username (used as database username and wordpress admin username): "
 read -s  wordpress_user
 echo "Enter the root password for wordpress (used as MySql root password, db password and admin password): "
-stty -echo
-read wordpress_password
-stty echo
-echo " "
+echo -n Password:
+read -s wordpress_password
+echo
 
+# Update the system
+sudo apt update -y
+sudo apt upgrade -y
 
-# Step 2: Update the system
-sudo apt update
-sudo apt upgrade
-
-# Step 3: Install the required packages
+# Install the required packages
 clear
-echo "Installing packages on the system.."
-sudo apt-get install apache2 -y
-sudo apt-get install php libapache2-mod-php -y
+echo "Installing required packages..."
+sudo apt install -y apache2 php php-mysql mysql-server php-curl php-gd php-intl php-mbstring php-soap php-xml \
+php-xmlrpc php-zip php-json libapache2-mod-php
 
-# Install PostgreSQL
-sudo apt-get install postgresql postgresql-contrib -y
-
-# Install PHP extensions for PostgreSQL
-sudo apt-get install php-pgsql -y
-
-# Create a PostgreSQL user and database for WordPress
-sudo -u postgres psql -c "CREATE USER $wordpress_user WITH PASSWORD '$wordpress_password';"
-sudo -u postgres psql -c "CREATE DATABASE $wp_db_name OWNER $wordpress_user;"
-
-# Step 4: Configure the web and database servers to run at startup
-sudo systemctl enable apache2
-sudo systemctl start apache2
-sudo systemctl enable postgresql
-sudo systemctl start postgresql
-
-# Step 5: : Download the wordpress package
+# Download and extract the latest version of WordPress
 clear
-echo "Downloading the wordpress package.."
-wget https://wordpress.org/latest.tar.gz
-tar -xvzf latest.tar.gz
-sudo mv wordpress /var/www/html/wordpress
-sudo rm -rf latest.tar.gz
+echo "Configuring the database..."
+cd /tmp/
+curl -LO https://wordpress.org/latest.tar.gz
+tar xzvf latest.tar.gz
+sudo mv wordpress /var/www/html
 
-# Configure Apache to serve WordPress
-sudo cat << EOF > /etc/apache2/sites-available/wordpress.conf
-<VirtualHost *:80>
-    ServerAdmin admin@example.com
-    DocumentRoot /var/www/html/wordpress
-    ServerName example.com
-    ServerAlias www.example.com
-    <Directory /var/www/html/wordpress>
-        AllowOverride All
-    </Directory>
-    ErrorLog /var/log/apache2/error.log
-    CustomLog /var/log/apache2/access.log combined
-</VirtualHost>
+# Set permissions for WordPress
+sudo chown -R www-data:www-data /var/www/html/wordpress
+sudo chmod -R 755 /var/www/html/wordpress
+
+# Create a MySQL database for WordPress
+mysql -u root -p << EOF
+CREATE DATABASE $wp_db_name;
+CREATE USER '$wordpress_user'@'localhost' IDENTIFIED BY '$wordpress_password';
+GRANT ALL PRIVILEGES ON wordpress.* TO '$wordpress_user'@'localhost';
+FLUSH PRIVILEGES;
 EOF
-sudo a2ensite wordpress.conf
-sudo a2dissite 000-default.conf
-sudo systemctl restart apache2
 
-# Copy the WordPress configuration file
-sudo cp /var/www/html/wordpress/wp-config-sample.php /var/www/html/wordpress/wp-config.php
+# Rename the WordPress sample configuration file and configure it
+sudo mv /var/www/html/wordpress/wp-config-sample.php /var/www/html/wordpress/wp-config.php
+sudo sed -i 's/database_name_here/$wordpress/g' /var/www/html/wordpress/wp-config.php
+sudo sed -i 's/username_here/$wordpress_user/g' /var/www/html/wordpress/wp-config.php
+sudo sed -i 's/password_here/$wordpress_password/g' /var/www/html/wordpress/wp-config.php
 
-# Replace the placeholders in the WordPress configuration file with the actual values
-sudo sed -i "s/database_name_here/$wp_db_name/" /var/www/html/wordpress/wp-config.php
-sudo sed -i "s/username_here/$wordpress_user/" /var/www/html/wordpress/wp-config.php
-sudo sed -i "s/password_here/$wordpress_password/" /var/www/html/wordpress/wp-config.php
+
+# reload apache2
+sudo systemctl reload apache2
 
 # Launch the WordPress installation in a web browser
+clear
+echo "Installation complete!"
 echo "Access your WordPress site at http://<your-ec2-instance-ip>/wordpress"
