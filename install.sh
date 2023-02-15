@@ -11,13 +11,14 @@ clear
 wp_db_name="wordpress"
 
 echo "Enter a wordpress username (used as database username and wordpress admin username): "
-read -s  wordpress_user
+read wordpress_user
 echo "Enter the root password for wordpress (used as MySql root password, db password and admin password): "
 echo -n Password:
 read -s wordpress_password
 echo
 
 # Update the system
+clear
 sudo apt update -y
 sudo apt upgrade -y
 
@@ -40,15 +41,11 @@ sudo rm -rf wordpress latest.tar.gz
 sudo chown -R www-data:www-data /var/www/html/wordpress
 sudo chmod -R 755 /var/www/html/wordpress
 
-# Create a MySQL database for WordPress
+# Create a MySQL database for WordPress (https://wordpress.org/documentation/article/creating-database-for-wordpress/)
 sudo mysql -u root -p"$wordpress_password" -e "CREATE DATABASE $wp_db_name;"
 sudo mysql -u root -p"$wordpress_password" -e "GRANT ALL PRIVILEGES ON $wp_db_name.* TO '$wordpress_user'@'localhost' IDENTIFIED BY '$wordpress_password';"
 sudo mysql -u root -p"$wordpress_password" -e "FLUSH PRIVILEGES;"
 sudo mysql -u root -p"$wordpress_password" -e "EXIT;"
-sudo mysql -u root -p"$wordpress_password" -e "SHOW DATABASES;"
-sudo mysql -u root -p"$wordpress_password" -e "USE $wp_db_name;"
-sudo mysql -u root -p"$wordpress_password" -e "SHOW TABLES;"
-sudo mysql -u root -p"$wordpress_password" -e "SELECT user,host FROM mysql.user;"
 
 # Rename the WordPress sample configuration file and configure it
 sudo mv /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
@@ -62,4 +59,4 @@ sudo systemctl reload apache2
 # Launch the WordPress installation in a web browser
 clear
 echo "Installation complete!"
-echo "Access your WordPress site at http://<your-ec2-instance-ip>/wordpress"
+echo "Access your WordPress site at http://<your-instance-ip>/wp-admin/install.php"
