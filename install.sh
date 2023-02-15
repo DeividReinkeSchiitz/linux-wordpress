@@ -54,10 +54,21 @@ sudo sed -i "s/username_here/$wordpress_user/g" /var/www/html/wp-config.php
 sudo sed -i "s/password_here/$wordpress_password/g" /var/www/html/wp-config.php
 sudo rm -rf /var/www/html/index.html
 
+# change the file ownership and permissions of the WordPress files and folders
+# so that they can be modified by the web server.
+sudo chown -R www-data:www-data /var/www/html
+#sudo find /var/www/html -type d -exec chmod 750 {} \;
+#sudo find /var/www/html -type f -exec chmod 640 {} \;
+
 # reload apache2
 sudo sed -i "s/AllowOverride None/AllowOverride All/g" /etc/apache2/apache2.conf
 sudo a2enmod rewrite
 sudo systemctl reload apache2
+
+# Enable ftp connection to wordpress
+sudo sed -i "s/;ftp/ftp/g" /etc/php/7.4/apache2/php.ini
+sudo systemctl reload apache2
+
 
 # Launch the WordPress installation in a web browser
 clear
