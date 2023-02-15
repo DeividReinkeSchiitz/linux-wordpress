@@ -52,8 +52,11 @@ sudo mv /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
 sudo sed -i "s/database_name_here/$wp_db_name/g" /var/www/html/wp-config.php
 sudo sed -i "s/username_here/$wordpress_user/g" /var/www/html/wp-config.php
 sudo sed -i "s/password_here/$wordpress_password/g" /var/www/html/wp-config.php
+sudo rm -rf /var/www/html/index.html
 
 # reload apache2
+sudo sed -i "s/AllowOverride None/AllowOverride All/g" /etc/apache2/apache2.conf
+sudo a2enmod rewrite
 sudo systemctl reload apache2
 
 # Launch the WordPress installation in a web browser
