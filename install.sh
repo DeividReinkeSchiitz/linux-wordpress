@@ -37,10 +37,6 @@ tar xzvf latest.tar.gz
 sudo mv wordpress/* /var/www/html
 sudo rm -rf wordpress latest.tar.gz
 
-# Set permissions for WordPress
-sudo chown -R www-data:www-data /var/www/html/wordpress
-sudo chmod -R 755 /var/www/html/wordpress
-
 # Create a MySQL database for WordPress (https://wordpress.org/documentation/article/creating-database-for-wordpress/)
 sudo mysql -u root -p"$wordpress_password" -e "CREATE DATABASE $wp_db_name;"
 sudo mysql -u root -p"$wordpress_password" -e "GRANT ALL PRIVILEGES ON $wp_db_name.* TO '$wordpress_user'@'localhost' IDENTIFIED BY '$wordpress_password';"
