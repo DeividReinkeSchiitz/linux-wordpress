@@ -10,7 +10,7 @@ chmod +x install.sh
 sudo ./install.sh
 ```
 The code will just copy the install bash and exec it.
-If you a more detailed project you can read this [article](https://medium.com/p/b707b9b05383) in medium.
+is there also an [article](https://medium.com/p/b707b9b05383) in medium using this code in a real project example.
 
 ## Contributing
 
